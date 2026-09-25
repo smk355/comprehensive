@@ -35,14 +35,18 @@
 
   <div class="modal-overlay hidden" id="quizModal">
     <div class="modal">
-      <h3>Take a Quiz</h3>
-      <p class="modal-sub">Choose how many questions — pulled proportionally across all topics and shuffled.</p>
-      <div class="quiz-size-options">
-        <button class="quiz-size-btn" data-size="50">50 questions</button>
-        <button class="quiz-size-btn" data-size="100">100 questions</button>
-        <button class="quiz-size-btn" data-size="200">200 questions</button>
+      <div id="quizStepSection">
+        <h3>Take a Quiz</h3>
+        <p class="modal-sub">Choose a section.</p>
+        <div class="quiz-size-options" id="sectionOptions"></div>
+        <button class="modal-cancel" id="quizCancelBtn">Cancel</button>
       </div>
-      <button class="modal-cancel" id="quizCancelBtn">Cancel</button>
+      <div id="quizStepCount" class="hidden">
+        <h3>Take a Quiz</h3>
+        <p class="modal-sub" id="quizCountSub">Choose how many questions.</p>
+        <div class="quiz-size-options" id="countOptions"></div>
+        <button class="modal-cancel" id="quizBackBtn">Back</button>
+      </div>
     </div>
   </div>
 

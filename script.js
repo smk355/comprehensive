@@ -205,6 +205,12 @@ const controlsEl = document.getElementById('controls');
 const quizBtn = document.getElementById('quizBtn');
 const quizModal = document.getElementById('quizModal');
 const quizCancelBtn = document.getElementById('quizCancelBtn');
+const quizBackBtn = document.getElementById('quizBackBtn');
+const quizStepSection = document.getElementById('quizStepSection');
+const quizStepCount = document.getElementById('quizStepCount');
+const sectionOptionsEl = document.getElementById('sectionOptions');
+const countOptionsEl = document.getElementById('countOptions');
+const quizCountSubEl = document.getElementById('quizCountSub');
 const quizBar = document.getElementById('quizBar');
 const quizProgressEl = document.getElementById('quizProgress');
 const quizExitBtn = document.getElementById('quizExitBtn');
@@ -212,6 +218,7 @@ const quizRetakeBtn = document.getElementById('quizRetakeBtn');
 
 let quizActive = false;
 let quizSize = 0;
+let quizSection = 'All';
 let quizQuestions = [];
 let quizTotal = 0;
 let quizAnswered = 0;
@@ -223,6 +230,12 @@ function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+function topicCounts() {
+  const counts = {};
+  for (const q of ALL) counts[q.topic] = (counts[q.topic] || 0) + 1;
+  return counts;
 }
 
 function buildQuiz(size) {
@@ -239,26 +252,67 @@ function buildQuiz(size) {
   return shuffle(picked);
 }
 
-quizBtn.addEventListener('click', () => {
+function buildSectionQuiz(topic, size) {
+  const pool = shuffle(ALL.filter(q => q.topic === topic).slice());
+  return pool.slice(0, size);
+}
+
+function openQuizModal() {
+  quizStepCount.classList.add('hidden');
+  quizStepSection.classList.remove('hidden');
+  const counts = topicCounts();
+  const topics = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  sectionOptionsEl.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'quiz-size-btn';
+  allBtn.textContent = `All topics (${ALL.length})`;
+  allBtn.addEventListener('click', () => showCountStep('All'));
+  sectionOptionsEl.appendChild(allBtn);
+  for (const t of topics) {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-size-btn';
+    btn.textContent = `${t} (${counts[t]})`;
+    btn.addEventListener('click', () => showCountStep(t));
+    sectionOptionsEl.appendChild(btn);
+  }
   quizModal.classList.remove('hidden');
-});
-quizCancelBtn.addEventListener('click', () => {
-  quizModal.classList.add('hidden');
-});
+}
+
+function showCountStep(section) {
+  quizSection = section;
+  const available = section === 'All' ? ALL.length : (topicCounts()[section] || 0);
+  quizCountSubEl.textContent = section === 'All'
+    ? 'Pulled proportionally across all topics and shuffled.'
+    : `Random questions from ${section} (${available} available), shuffled.`;
+
+  countOptionsEl.innerHTML = '';
+  [50, 100, 200].forEach(size => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-size-btn';
+    const capped = section !== 'All' && size > available;
+    btn.textContent = capped ? `${size} questions (only ${available} available)` : `${size} questions`;
+    btn.addEventListener('click', () => {
+      quizModal.classList.add('hidden');
+      startQuiz(section, size);
+    });
+    countOptionsEl.appendChild(btn);
+  });
+
+  quizStepSection.classList.add('hidden');
+  quizStepCount.classList.remove('hidden');
+}
+
+quizBtn.addEventListener('click', openQuizModal);
+quizCancelBtn.addEventListener('click', () => quizModal.classList.add('hidden'));
+quizBackBtn.addEventListener('click', openQuizModal);
 quizModal.addEventListener('click', (e) => {
   if (e.target === quizModal) quizModal.classList.add('hidden');
 });
 
-document.querySelectorAll('.quiz-size-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    quizModal.classList.add('hidden');
-    startQuiz(parseInt(btn.dataset.size, 10));
-  });
-});
-
-function startQuiz(size) {
+function startQuiz(section, size) {
+  quizSection = section;
   quizSize = size;
-  quizQuestions = buildQuiz(size);
+  quizQuestions = section === 'All' ? buildQuiz(size) : buildSectionQuiz(section, size);
   quizTotal = quizQuestions.length;
   quizAnswered = 0;
   quizScore = 0;
@@ -283,7 +337,9 @@ function updateQuizProgress() {
 }
 
 function renderQuiz() {
-  statsEl.textContent = `Quiz — ${quizTotal} questions`;
+  statsEl.textContent = quizSection === 'All'
+    ? `Quiz — ${quizTotal} questions`
+    : `Quiz — ${quizSection} — ${quizTotal} questions`;
   const frag = document.createDocumentFragment();
   quizQuestions.forEach((q, idx) => {
     frag.appendChild(buildCard(q, idx + 1, (isCorrect) => {
@@ -304,4 +360,4 @@ function exitQuiz() {
 }
 
 quizExitBtn.addEventListener('click', exitQuiz);
-quizRetakeBtn.addEventListener('click', () => startQuiz(quizSize));
+quizRetakeBtn.addEventListener('click', () => startQuiz(quizSection, quizSize));
