@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Prep — Question Bank</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Exam Prep</h1>
+    <div class="topbar-right">
+      <div class="stats" id="stats"></div>
+      <button class="quiz-btn" id="quizBtn">Take a Quiz</button>
+    </div>
+  </header>
+
+  <div class="controls" id="controls">
+    <div class="topic-filter" id="topicFilter"></div>
+    <select class="topic-select" id="topicSelect"></select>
+    <input type="search" id="searchBox" placeholder="Search questions…">
+  </div>
+
+  <div class="quiz-bar hidden" id="quizBar">
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-bar-actions">
+      <button class="quiz-bar-btn" id="quizRetakeBtn" style="display:none;">Retake</button>
+      <button class="quiz-bar-btn" id="quizExitBtn">Exit Quiz</button>
+    </div>
+  </div>
+
+  <main id="questionList"></main>
+
+  <div class="scroll-top" id="scrollTop">&#8593;</div>
+
+  <div class="modal-overlay hidden" id="quizModal">
+    <div class="modal">
+      <h3>Take a Quiz</h3>
+      <p class="modal-sub">Choose how many questions — pulled proportionally across all topics and shuffled.</p>
+      <div class="quiz-size-options">
+        <button class="quiz-size-btn" data-size="50">50 questions</button>
+        <button class="quiz-size-btn" data-size="100">100 questions</button>
+        <button class="quiz-size-btn" data-size="200">200 questions</button>
+      </div>
+      <button class="modal-cancel" id="quizCancelBtn">Cancel</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

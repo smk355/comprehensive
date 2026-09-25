@@ -1,0 +1,462 @@
+<title>Exam Prep</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; }
+
+:root {
+  --bg: #0f1115;
+  --panel: #171a21;
+  --panel-border: #262b36;
+  --text: #e8eaf0;
+  --text-dim: #9aa1b1;
+  --accent: #6c8cff;
+  --correct: #2fbf6a;
+  --correct-bg: rgba(47, 191, 106, 0.14);
+  --wrong: #ef5b5b;
+  --wrong-bg: rgba(239, 91, 91, 0.14);
+  --option-bg: #1e222c;
+  --option-hover: #262b38;
+}
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: rgba(15, 17, 21, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.topbar h1 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.stats {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quiz-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.12s ease;
+}
+.quiz-btn:hover { filter: brightness(1.1); }
+
+.controls {
+  position: sticky;
+  top: calc(57px + env(safe-area-inset-top, 0px));
+  z-index: 9;
+  background: var(--bg);
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topic-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.topic-chip {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 12.5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.topic-chip:hover { border-color: var(--accent); color: var(--text); }
+.topic-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.topic-chip .count { opacity: 0.7; margin-left: 4px; }
+
+.topic-select {
+  display: none;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  width: 100%;
+}
+.topic-select:focus { outline: none; border-color: var(--accent); }
+
+#searchBox {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  max-width: 340px;
+}
+#searchBox:focus { outline: none; border-color: var(--accent); }
+
+.hidden { display: none !important; }
+
+.quiz-bar {
+  position: sticky;
+  top: calc(57px + env(safe-area-inset-top, 0px));
+  z-index: 9;
+  background: var(--panel);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quiz-progress {
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 500;
+}
+.quiz-progress b { color: var(--accent); }
+.quiz-progress .quiz-score-final { color: var(--correct); }
+
+.quiz-bar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.quiz-bar-btn {
+  background: var(--option-bg);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.quiz-bar-btn:hover { border-color: var(--accent); }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+}
+.modal h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+.modal-sub {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.quiz-size-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quiz-size-btn {
+  background: var(--option-bg);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
+}
+.quiz-size-btn:hover { border-color: var(--accent); background: var(--option-hover); }
+
+.modal-cancel {
+  width: 100%;
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  padding: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.modal-cancel:hover { color: var(--text); }
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.q-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.q-head {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.q-num {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.q-text {
+  font-size: 15.5px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.q-topic {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: #12151c;
+  border: 1px solid var(--panel-border);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+.q-diagram {
+  display: block;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  margin-bottom: 14px;
+  background: #fff;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--option-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14.5px;
+  line-height: 1.45;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.option:hover:not(.locked) { background: var(--option-hover); border-color: #3a4152; }
+
+.opt-image {
+  display: inline-block;
+  max-height: 26px;
+  vertical-align: middle;
+  background: #fff;
+  border-radius: 3px;
+  padding: 2px 4px;
+}
+
+.option .opt-letter {
+  font-weight: 700;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  width: 18px;
+}
+
+.option.correct {
+  background: var(--correct-bg);
+  border-color: var(--correct);
+  color: var(--correct);
+}
+.option.correct .opt-letter { color: var(--correct); }
+
+.option.wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong);
+  color: var(--wrong);
+}
+.option.wrong .opt-letter { color: var(--wrong); }
+
+.option.locked { cursor: default; }
+.option.dim { opacity: 0.55; }
+
+.answer-block {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--panel-border);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  display: none;
+}
+.answer-block.show { display: block; }
+.answer-block b { color: var(--text); }
+
+.flag-note {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #d99a3d;
+  background: rgba(217, 154, 61, 0.12);
+  border: 1px solid rgba(217, 154, 61, 0.35);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.scroll-top {
+  position: fixed;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  right: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-size: 18px;
+}
+.scroll-top.visible { opacity: 1; pointer-events: auto; }
+
+.empty-state {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 60px 20px;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .topbar, .controls { padding-left: 16px; padding-right: 16px; }
+  .q-card { padding: 14px 14px; }
+}
+
+@media (max-width: 640px) {
+  .topic-filter { display: none; }
+  .topic-select { display: block; }
+  .controls { top: calc(53px + env(safe-area-inset-top, 0px)); gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+  .quiz-bar { top: calc(53px + env(safe-area-inset-top, 0px)); padding: 10px 16px; }
+  .quiz-btn { padding: 6px 12px; font-size: 12px; }
+  .topbar-right { gap: 10px; }
+}
+</style>
+
+<header class="topbar">
+  <h1>Exam Prep</h1>
+  <div class="topbar-right">
+    <div class="stats" id="stats"></div>
+    <button class="quiz-btn" id="quizBtn">Take a Quiz</button>
+  </div>
+</header>
+
+<div class="controls" id="controls">
+  <div class="topic-filter" id="topicFilter"></div>
+  <select class="topic-select" id="topicSelect"></select>
+  <input type="search" id="searchBox" placeholder="Search questions…">
+</div>
+
+<div class="quiz-bar hidden" id="quizBar">
+  <div class="quiz-progress" id="quizProgress"></div>
+  <div class="quiz-bar-actions">
+    <button class="quiz-bar-btn" id="quizRetakeBtn" style="display:none;">Retake</button>
+    <button class="quiz-bar-btn" id="quizExitBtn">Exit Quiz</button>
+  </div>
+</div>
+
+<main id="questionList"></main>
+
+<div class="scroll-top" id="scrollTop">&#8593;</div>
+
+<div class="modal-overlay hidden" id="quizModal">
+  <div class="modal">
+    <h3>Take a Quiz</h3>
+    <p class="modal-sub">Choose how many questions — pulled proportionally across all topics and shuffled.</p>
+    <div class="quiz-size-options">
+      <button class="quiz-size-btn" data-size="50">50 questions</button>
+      <button class="quiz-size-btn" data-size="100">100 questions</button>
+      <button class="quiz-size-btn" data-size="200">200 questions</button>
+    </div>
+    <button class="modal-cancel" id="quizCancelBtn">Cancel</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
